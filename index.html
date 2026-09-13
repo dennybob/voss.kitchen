@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="Voss Kitchen — recipes worth keeping.">
+    <meta name="theme-color" content="#f6f3ed">
+
+    <title>Voss Kitchen</title>
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div class="container header-inner">
+
+            <a href="index.html" class="site-logo">
+                <span class="logo-name">Voss</span>
+                <span class="logo-kitchen">Kitchen</span>
+            </a>
+
+            <nav class="main-nav" aria-label="Main navigation">
+                <a href="index.html" class="nav-link active">Recipes</a>
+                <a href="#" class="nav-link">About</a>
+                <a href="#" class="nav-link">Log In</a>
+            </nav>
+
+        </div>
+    </header>
+
+
+    <main>
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="container hero-inner">
+
+                <p class="eyebrow">The Voss Family Cookbook</p>
+
+                <h1>Recipes worth keeping.</h1>
+
+                <p class="hero-text">
+                    Family favorites, old traditions, and new recipes
+                    worth making again.
+                </p>
+
+                <div class="search-wrapper">
+                    <label for="recipe-search" class="visually-hidden">
+                        Search recipes
+                    </label>
+
+                    <input
+                        type="search"
+                        id="recipe-search"
+                        class="search-input"
+                        placeholder="Search recipes..."
+                        autocomplete="off"
+                    >
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- Recipe Section -->
+        <section class="recipes-section">
+            <div class="container">
+
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">From our kitchen</p>
+                        <h2>Recipes</h2>
+                    </div>
+
+                    <div class="recipe-count" id="recipe-count">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                </div>
+
+
+                <!--
+                    This is where recipes from Supabase
+                    will eventually be displayed.
+                -->
+                <div id="recipe-grid" class="recipe-grid">
+
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⌂</div>
+
+                        <h3>The kitchen is warming up.</h3>
+
+                        <p>
+                            Recipes will appear here once we've added
+                            them to the cookbook.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+
+            <p>
+                © <span id="current-year"></span> Voss Kitchen
+            </p>
+
+            <p class="footer-tagline">
+                Recipes worth keeping.
+            </p>
+
+        </div>
+    </footer>
+
+
+    <!-- Supabase JavaScript client -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+    <!-- Our application -->
+    <script src="js/app.js"></script>
+
+</body>
+</html>
