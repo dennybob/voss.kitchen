@@ -2,97 +2,97 @@ const SUPABASE_URL = "https://stozhfrjxmrsteppwbvy.supabase.co/rest/v1/";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_dWw9OpeLA4Fg8zzOF6A8qg_qKTddtZc";
 
 const supabaseClient = window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_PUBLISHABLE_KEY
+	SUPABASE_URL,
+	SUPABASE_PUBLISHABLE_KEY
 );
 
 document.addEventListener("DOMContentLoaded", () => {
-setCurrentYear();
-loadRecipe();
+	setCurrentYear();
+	loadRecipe();
 });
 
 function setCurrentYear() {
-const yearElement =
-document.getElementById("current-year");
+	const yearElement =
+		document.getElementById("current-year");
 
-```
-if (yearElement) {
-    yearElement.textContent =
-        new Date().getFullYear();
-}
-```
+
+	if (yearElement) {
+		yearElement.textContent =
+			new Date().getFullYear();
+	}
+
 
 }
 
 async function loadRecipe() {
 
-```
-const recipeId = getRecipeIdFromUrl();
 
-if (!recipeId) {
-    displayRecipeError(
-        "No recipe was selected.",
-        "Please return to the recipes page and choose a recipe."
-    );
-    return;
-}
+	const recipeId = getRecipeIdFromUrl();
 
-const { data: recipe, error } = await supabaseClient
-    .from("recipes")
-    .select("*")
-    .eq("id", recipeId)
-    .single();
+	if (!recipeId) {
+		displayRecipeError(
+			"No recipe was selected.",
+			"Please return to the recipes page and choose a recipe."
+		);
+		return;
+	}
 
-if (error || !recipe) {
-    console.error("Error loading recipe:", error);
+	const { data: recipe, error } = await supabaseClient
+		.from("recipes")
+		.select("*")
+		.eq("id", recipeId)
+		.single();
 
-    displayRecipeError(
-        "Recipe not found.",
-        "This recipe may have been removed or the link may be incorrect."
-    );
+	if (error || !recipe) {
+		console.error("Error loading recipe:", error);
 
-    return;
-}
+		displayRecipeError(
+			"Recipe not found.",
+			"This recipe may have been removed or the link may be incorrect."
+		);
 
-displayRecipe(recipe);
-```
+		return;
+	}
+
+	displayRecipe(recipe);
+
 
 }
 
 function getRecipeIdFromUrl() {
 
-```
-const params = new URLSearchParams(
-    window.location.search
-);
 
-return params.get("id");
-```
+	const params = new URLSearchParams(
+		window.location.search
+	);
+
+	return params.get("id");
+
 
 }
 
 function displayRecipe(recipe) {
 
-```
-const container =
-    document.getElementById("recipe-detail");
 
-if (!container) {
-    return;
-}
+	const container =
+		document.getElementById("recipe-detail");
 
-document.title =
-    `${recipe.title} | Voss Kitchen`;
+	if (!container) {
+		return;
+	}
 
-const category =
-    recipe.category || "Recipe";
+	document.title =
+		`${recipe.title} | Voss Kitchen`;
 
-const description =
-    recipe.description || "";
+	const category =
+		recipe.category || "Recipe";
 
-const imageHtml =
-    recipe.image_url
-        ? `
+	const description =
+		recipe.description || "";
+
+	const imageHtml =
+		recipe.image_url
+			? `
             <div class="recipe-detail-image">
                 <img
                     src="${escapeHtml(recipe.image_url)}"
@@ -100,12 +100,12 @@ const imageHtml =
                 >
             </div>
           `
-        : "";
+			: "";
 
-const metadataItems = [];
+	const metadataItems = [];
 
-if (recipe.servings) {
-    metadataItems.push(`
+	if (recipe.servings) {
+		metadataItems.push(`
         <div class="recipe-meta-item">
             <span class="recipe-meta-label">Servings</span>
             <span class="recipe-meta-value">
@@ -113,10 +113,10 @@ if (recipe.servings) {
             </span>
         </div>
     `);
-}
+	}
 
-if (recipe.prep_time) {
-    metadataItems.push(`
+	if (recipe.prep_time) {
+		metadataItems.push(`
         <div class="recipe-meta-item">
             <span class="recipe-meta-label">Prep time</span>
             <span class="recipe-meta-value">
@@ -124,10 +124,10 @@ if (recipe.prep_time) {
             </span>
         </div>
     `);
-}
+	}
 
-if (recipe.cook_time) {
-    metadataItems.push(`
+	if (recipe.cook_time) {
+		metadataItems.push(`
         <div class="recipe-meta-item">
             <span class="recipe-meta-label">Cook time</span>
             <span class="recipe-meta-value">
@@ -135,16 +135,16 @@ if (recipe.cook_time) {
             </span>
         </div>
     `);
-}
+	}
 
-const ingredients =
-    Array.isArray(recipe.ingredients)
-        ? recipe.ingredients
-        : [];
+	const ingredients =
+		Array.isArray(recipe.ingredients)
+			? recipe.ingredients
+			: [];
 
-const ingredientsHtml =
-    ingredients.length > 0
-        ? `
+	const ingredientsHtml =
+		ingredients.length > 0
+			? `
             <ul class="ingredients-list">
                 ${ingredients.map(ingredient => `
                     <li>
@@ -153,18 +153,18 @@ const ingredientsHtml =
                 `).join("")}
             </ul>
           `
-        : `
+			: `
             <p class="recipe-placeholder">
                 No ingredients have been added yet.
             </p>
           `;
 
-const instructionsHtml =
-    formatInstructions(recipe.instructions);
+	const instructionsHtml =
+		formatInstructions(recipe.instructions);
 
-const notesHtml =
-    recipe.notes
-        ? `
+	const notesHtml =
+		recipe.notes
+			? `
             <section class="recipe-notes">
                 <h2>Notes</h2>
                 <div class="recipe-notes-text">
@@ -172,9 +172,9 @@ const notesHtml =
                 </div>
             </section>
           `
-        : "";
+			: "";
 
-container.innerHTML = `
+	container.innerHTML = `
     <article class="recipe-detail">
 
         ${imageHtml}
@@ -191,27 +191,25 @@ container.innerHTML = `
                     ${escapeHtml(recipe.title)}
                 </h1>
 
-                ${
-                    description
-                        ? `
+                ${description
+			? `
                             <p class="recipe-detail-description">
                                 ${escapeHtml(description)}
                             </p>
                           `
-                        : ""
-                }
+			: ""
+		}
 
             </div>
 
-            ${
-                metadataItems.length > 0
-                    ? `
+            ${metadataItems.length > 0
+			? `
                         <div class="recipe-meta">
                             ${metadataItems.join("")}
                         </div>
                       `
-                    : ""
-            }
+			: ""
+		}
 
             <div class="recipe-columns">
 
@@ -235,21 +233,21 @@ container.innerHTML = `
 
     </article>
 `;
-```
+
 
 }
 
 function displayRecipeError(title, message) {
 
-```
-const container =
-    document.getElementById("recipe-detail");
 
-if (!container) {
-    return;
-}
+	const container =
+		document.getElementById("recipe-detail");
 
-container.innerHTML = `
+	if (!container) {
+		return;
+	}
+
+	container.innerHTML = `
     <div class="recipe-error">
         <h1>${escapeHtml(title)}</h1>
         <p>${escapeHtml(message)}</p>
@@ -258,90 +256,90 @@ container.innerHTML = `
         </a>
     </div>
 `;
-```
+
 
 }
 
 function formatIngredient(ingredient) {
 
-```
-if (typeof ingredient === "string") {
-    return escapeHtml(ingredient);
-}
 
-if (!ingredient || typeof ingredient !== "object") {
-    return "";
-}
+	if (typeof ingredient === "string") {
+		return escapeHtml(ingredient);
+	}
 
-const quantity =
-    ingredient.quantity || "";
+	if (!ingredient || typeof ingredient !== "object") {
+		return "";
+	}
 
-const unit =
-    ingredient.unit || "";
+	const quantity =
+		ingredient.quantity || "";
 
-const name =
-    ingredient.name || ingredient.ingredient || "";
+	const unit =
+		ingredient.unit || "";
 
-const parts = [
-    quantity,
-    unit,
-    name
-].filter(Boolean);
+	const name =
+		ingredient.name || ingredient.ingredient || "";
 
-return escapeHtml(parts.join(" "));
-```
+	const parts = [
+		quantity,
+		unit,
+		name
+	].filter(Boolean);
+
+	return escapeHtml(parts.join(" "));
+
 
 }
 
 function formatInstructions(instructions) {
 
-```
-if (!instructions) {
-    return `
+
+	if (!instructions) {
+		return `
         <p class="recipe-placeholder">
             No instructions have been added yet.
         </p>
     `;
-}
+	}
 
-const text =
-    String(instructions);
+	const text =
+		String(instructions);
 
-const paragraphs =
-    text.split(/\n\s*\n/);
+	const paragraphs =
+		text.split(/\n\s*\n/);
 
-return paragraphs.map(paragraph => `
+	return paragraphs.map(paragraph => `
     <p>
         ${escapeHtml(paragraph).replace(/\n/g, "<br>")}
     </p>
 `).join("");
-```
+
 
 }
 
 function formatMultilineText(text) {
 
-```
-return escapeHtml(String(text))
-    .replace(/\n\s*\n/g, "</p><p>")
-    .replace(/\n/g, "<br>");
-```
+
+	return escapeHtml(String(text))
+		.replace(/\n\s*\n/g, "</p><p>")
+		.replace(/\n/g, "<br>");
+
 
 }
 
 function escapeHtml(value) {
 
-```
-if (value === null || value === undefined) {
-    return "";
-}
 
-return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-```
+	if (value === null || value === undefined) {
+		return "";
+	}
+
+	return String(value)
+		.replaceAll("&", "&amp;")
+		.replaceAll("<", "&lt;")
+		.replaceAll(">", "&gt;")
+		.replaceAll('"', "&quot;")
+		.replaceAll("'", "&#039;");
+
 
 }

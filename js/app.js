@@ -2,27 +2,27 @@ const SUPABASE_URL = "https://stozhfrjxmrsteppwbvy.supabase.co/rest/v1/";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_dWw9OpeLA4Fg8zzOF6A8qg_qKTddtZc";
 
 const supabaseClient = window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_PUBLISHABLE_KEY
+	SUPABASE_URL,
+	SUPABASE_PUBLISHABLE_KEY
 );
 
 document.addEventListener("DOMContentLoaded", () => {
 
-```
-setCurrentYear();
 
-loadRecipes();
+	setCurrentYear();
 
-const searchInput =
-    document.getElementById("recipe-search");
+	loadRecipes();
 
-if (searchInput) {
-    searchInput.addEventListener(
-        "input",
-        handleSearch
-    );
-}
-```
+	const searchInput =
+		document.getElementById("recipe-search");
+
+	if (searchInput) {
+		searchInput.addEventListener(
+			"input",
+			handleSearch
+		);
+	}
+
 
 });
 
@@ -30,84 +30,84 @@ let allRecipes = [];
 
 function setCurrentYear() {
 
-```
-const yearElement =
-    document.getElementById("current-year");
 
-if (yearElement) {
-    yearElement.textContent =
-        new Date().getFullYear();
-}
-```
+	const yearElement =
+		document.getElementById("current-year");
+
+	if (yearElement) {
+		yearElement.textContent =
+			new Date().getFullYear();
+	}
+
 
 }
 
 async function loadRecipes() {
 
-```
-const grid =
-    document.getElementById("recipe-grid");
 
-if (grid) {
-    grid.innerHTML = `
+	const grid =
+		document.getElementById("recipe-grid");
+
+	if (grid) {
+		grid.innerHTML = `
         <div class="empty-state">
             <h3>Loading recipes...</h3>
         </div>
     `;
-}
+	}
 
-const { data, error } = await supabaseClient
-    .from("recipes")
-    .select("*")
-    .order("created_at", {
-        ascending: false
-    });
+	const { data, error } = await supabaseClient
+		.from("recipes")
+		.select("*")
+		.order("created_at", {
+			ascending: false
+		});
 
-if (error) {
+	if (error) {
 
-    console.error(
-        "Error loading recipes:",
-        error
-    );
+		console.error(
+			"Error loading recipes:",
+			error
+		);
 
-    displayLoadError();
+		displayLoadError();
 
-    return;
-}
+		return;
+	}
 
-allRecipes = data || [];
+	allRecipes = data || [];
 
-displayRecipes(allRecipes);
-```
+	displayRecipes(allRecipes);
+
 
 }
 
 function displayRecipes(recipes) {
 
-```
-const grid =
-    document.getElementById("recipe-grid");
 
-const count =
-    document.getElementById("recipe-count");
+	const grid =
+		document.getElementById("recipe-grid");
 
-if (!grid) {
-    return;
-}
+	const count =
+		document.getElementById("recipe-count");
 
-if (count) {
+	if (!grid) {
+		return;
+	}
 
-    const number =
-        recipes.length;
+	if (count) {
 
-    count.textContent =
-        `${number} ${number === 1 ? "recipe" : "recipes"}`;
+		const number =
+			recipes.length;
 
-}
+		count.textContent =
+			`${number} ${number === 1 ? "recipe" : "recipes"}`;
 
-if (recipes.length === 0) {
+	}
 
-    grid.innerHTML = `
+	if (recipes.length === 0) {
+
+		grid.innerHTML = `
         <div class="empty-state">
             <div class="empty-state-icon">⌂</div>
 
@@ -120,21 +120,21 @@ if (recipes.length === 0) {
         </div>
     `;
 
-    return;
-}
+		return;
+	}
 
 
-grid.innerHTML = recipes.map(recipe => {
+	grid.innerHTML = recipes.map(recipe => {
 
-    const category =
-        recipe.category || "Recipe";
+		const category =
+			recipe.category || "Recipe";
 
-    const description =
-        recipe.description || "";
+		const description =
+			recipe.description || "";
 
-    const imageHtml =
-        recipe.image_url
-            ? `
+		const imageHtml =
+			recipe.image_url
+				? `
                 <div class="recipe-card-image">
                     <img
                         src="${escapeHtml(recipe.image_url)}"
@@ -143,10 +143,10 @@ grid.innerHTML = recipes.map(recipe => {
                     >
                 </div>
               `
-            : "";
+				: "";
 
 
-    return `
+		return `
         <a
             href="recipe.html?id=${encodeURIComponent(recipe.id)}"
             class="recipe-card-link"
@@ -166,15 +166,14 @@ grid.innerHTML = recipes.map(recipe => {
                         ${escapeHtml(recipe.title)}
                     </h3>
 
-                    ${
-                        description
-                            ? `
+                    ${description
+				? `
                                 <p class="recipe-card-description">
                                     ${escapeHtml(description)}
                                 </p>
                               `
-                            : ""
-                    }
+				: ""
+			}
 
                     <span class="recipe-card-read-more">
                         View recipe →
@@ -187,69 +186,69 @@ grid.innerHTML = recipes.map(recipe => {
         </a>
     `;
 
-}).join("");
-```
+	}).join("");
+
 
 }
 
 function handleSearch(event) {
 
-```
-const searchTerm =
-    event.target.value
-        .trim()
-        .toLowerCase();
 
-if (!searchTerm) {
+	const searchTerm =
+		event.target.value
+			.trim()
+			.toLowerCase();
 
-    displayRecipes(allRecipes);
+	if (!searchTerm) {
 
-    return;
-}
+		displayRecipes(allRecipes);
 
-const filteredRecipes =
-    allRecipes.filter(recipe => {
+		return;
+	}
 
-        const title =
-            recipe.title || "";
+	const filteredRecipes =
+		allRecipes.filter(recipe => {
 
-        const description =
-            recipe.description || "";
+			const title =
+				recipe.title || "";
 
-        const category =
-            recipe.category || "";
+			const description =
+				recipe.description || "";
 
-        return (
-            title.toLowerCase().includes(searchTerm) ||
-            description.toLowerCase().includes(searchTerm) ||
-            category.toLowerCase().includes(searchTerm)
-        );
+			const category =
+				recipe.category || "";
 
-    });
+			return (
+				title.toLowerCase().includes(searchTerm) ||
+				description.toLowerCase().includes(searchTerm) ||
+				category.toLowerCase().includes(searchTerm)
+			);
 
-displayRecipes(filteredRecipes);
-```
+		});
+
+	displayRecipes(filteredRecipes);
+
 
 }
 
 function displayLoadError() {
 
-```
-const grid =
-    document.getElementById("recipe-grid");
 
-const count =
-    document.getElementById("recipe-count");
+	const grid =
+		document.getElementById("recipe-grid");
 
-if (count) {
-    count.textContent = "";
-}
+	const count =
+		document.getElementById("recipe-count");
 
-if (!grid) {
-    return;
-}
+	if (count) {
+		count.textContent = "";
+	}
 
-grid.innerHTML = `
+	if (!grid) {
+		return;
+	}
+
+	grid.innerHTML = `
     <div class="empty-state">
         <h3>Unable to load recipes.</h3>
 
@@ -258,23 +257,23 @@ grid.innerHTML = `
         </p>
     </div>
 `;
-```
+
 
 }
 
 function escapeHtml(value) {
 
-```
-if (value === null || value === undefined) {
-    return "";
-}
 
-return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-```
+	if (value === null || value === undefined) {
+		return "";
+	}
+
+	return String(value)
+		.replaceAll("&", "&amp;")
+		.replaceAll("<", "&lt;")
+		.replaceAll(">", "&gt;")
+		.replaceAll('"', "&quot;")
+		.replaceAll("'", "&#039;");
+
 
 }
