@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<meta name="description" content="Voss Kitchen recipe.">
+<meta name="theme-color" content="#f6f3ed">
+
+<title>Recipe | Voss Kitchen</title>
+
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="css/styles.css">
+```
+
+</head>
+
+<body>
+
+```
+<header class="site-header">
+    <div class="container header-inner">
+
+        <a href="index.html" class="site-logo">
+            <span class="logo-name">Voss</span>
+            <span class="logo-kitchen">Kitchen</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Main navigation">
+            <a href="index.html" class="nav-link active">Recipes</a>
+            <a href="#" class="nav-link">About</a>
+            <a href="#" class="nav-link">Log In</a>
+        </nav>
+
+    </div>
+</header>
+
+<main>
+
+    <section class="recipe-detail-section">
+        <div class="container">
+
+            <a href="index.html" class="back-link">
+                ← Back to recipes
+            </a>
+
+            <div id="recipe-detail">
+
+                <div class="recipe-loading">
+                    Loading recipe...
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <p>
+            © <span id="current-year"></span> Voss Kitchen
+        </p>
+
+        <p class="footer-tagline">
+            Recipes worth keeping.
+        </p>
+    </div>
+</footer>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="js/recipe.js"></script>
+```
+
+</body>
+</html>

@@ -1,172 +1,160 @@
-/* =========================================
-   VOSS KITCHEN
-   Application JavaScript
-   ========================================= */
-
-
-/* -----------------------------------------
-   Supabase Configuration
-   -----------------------------------------
-
-   Project URL and Publishable Key
-   from Supabase Dashboard > Settings > API
-   ----------------------------------------- */
-
 const SUPABASE_URL = "https://stozhfrjxmrsteppwbvy.supabase.co/rest/v1/";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_dWw9OpeLA4Fg8zzOF6A8qg_qKTddtZc";
 
-
-/* Create the Supabase client */
-
 const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
+SUPABASE_URL,
+SUPABASE_PUBLISHABLE_KEY
 );
-
-
-/* -----------------------------------------
-   Application Initialization
-   ----------------------------------------- */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    setCurrentYear();
+```
+setCurrentYear();
 
-    // Recipe loading will be enabled once
-    // we have recipes in the database.
-    //
-    // loadRecipes();
+loadRecipes();
+
+const searchInput =
+    document.getElementById("recipe-search");
+
+if (searchInput) {
+    searchInput.addEventListener(
+        "input",
+        handleSearch
+    );
+}
+```
 
 });
 
-
-/* -----------------------------------------
-   Footer Year
-   ----------------------------------------- */
+let allRecipes = [];
 
 function setCurrentYear() {
 
-    const yearElement =
-        document.getElementById("current-year");
+```
+const yearElement =
+    document.getElementById("current-year");
 
-    if (yearElement) {
-        yearElement.textContent =
-            new Date().getFullYear();
-    }
+if (yearElement) {
+    yearElement.textContent =
+        new Date().getFullYear();
 }
+```
 
-
-/* -----------------------------------------
-   Load Recipes
-   -----------------------------------------
-
-   This function will retrieve publicly
-   available recipes from Supabase.
-
-   RLS currently allows anyone to SELECT
-   recipes, so this will work for both
-   anonymous visitors and logged-in users.
-   ----------------------------------------- */
+}
 
 async function loadRecipes() {
 
-    const { data, error } = await supabaseClient
-        .from("recipes")
-        .select("*")
-        .order("created_at", {
-            ascending: false
-        });
+```
+const grid =
+    document.getElementById("recipe-grid");
 
-    if (error) {
-        console.error(
-            "Error loading recipes:",
-            error
-        );
-
-        return;
-    }
-
-    displayRecipes(data);
+if (grid) {
+    grid.innerHTML = `
+        <div class="empty-state">
+            <h3>Loading recipes...</h3>
+        </div>
+    `;
 }
 
+const { data, error } = await supabaseClient
+    .from("recipes")
+    .select("*")
+    .order("created_at", {
+        ascending: false
+    });
 
-/* -----------------------------------------
-   Display Recipes
-   ----------------------------------------- */
+if (error) {
+
+    console.error(
+        "Error loading recipes:",
+        error
+    );
+
+    displayLoadError();
+
+    return;
+}
+
+allRecipes = data || [];
+
+displayRecipes(allRecipes);
+```
+
+}
 
 function displayRecipes(recipes) {
 
-    const grid =
-        document.getElementById("recipe-grid");
+```
+const grid =
+    document.getElementById("recipe-grid");
 
-    const count =
-        document.getElementById("recipe-count");
+const count =
+    document.getElementById("recipe-count");
 
-    if (!grid) {
-        return;
-    }
+if (!grid) {
+    return;
+}
 
+if (count) {
 
-    /* Update recipe count */
+    const number =
+        recipes.length;
 
-    if (count) {
+    count.textContent =
+        `${number} ${number === 1 ? "recipe" : "recipes"}`;
 
-        const number = recipes.length;
+}
 
-        count.textContent =
-            `${number} ${number === 1 ? "recipe" : "recipes"}`;
-    }
+if (recipes.length === 0) {
 
+    grid.innerHTML = `
+        <div class="empty-state">
+            <div class="empty-state-icon">⌂</div>
 
-    /* No recipes */
+            <h3>The kitchen is warming up.</h3>
 
-    if (recipes.length === 0) {
+            <p>
+                Recipes will appear here once we've
+                added them to the cookbook.
+            </p>
+        </div>
+    `;
 
-        grid.innerHTML = `
-            <div class="empty-state">
-
-                <div class="empty-state-icon">⌂</div>
-
-                <h3>The kitchen is warming up.</h3>
-
-                <p>
-                    Recipes will appear here once we've
-                    added them to the cookbook.
-                </p>
-
-            </div>
-        `;
-
-        return;
-    }
+    return;
+}
 
 
-    /* Create recipe cards */
+grid.innerHTML = recipes.map(recipe => {
 
-    grid.innerHTML = recipes.map(recipe => {
+    const category =
+        recipe.category || "Recipe";
 
-        const category =
-            recipe.category || "Recipe";
+    const description =
+        recipe.description || "";
 
-        const description =
-            recipe.description || "";
+    const imageHtml =
+        recipe.image_url
+            ? `
+                <div class="recipe-card-image">
+                    <img
+                        src="${escapeHtml(recipe.image_url)}"
+                        alt="${escapeHtml(recipe.title)}"
+                        loading="lazy"
+                    >
+                </div>
+              `
+            : "";
 
-        return `
+
+    return `
+        <a
+            href="recipe.html?id=${encodeURIComponent(recipe.id)}"
+            class="recipe-card-link"
+        >
+
             <article class="recipe-card">
 
-                ${
-                    recipe.image_url
-                        ? `
-                            <div class="recipe-card-image">
-                                <img
-                                    src="${escapeHtml(recipe.image_url)}"
-                                    alt="${escapeHtml(recipe.title)}"
-                                    loading="lazy"
-                                >
-                            </div>
-                          `
-                        : ""
-                }
+                ${imageHtml}
 
                 <div class="recipe-card-content">
 
@@ -188,34 +176,105 @@ function displayRecipes(recipes) {
                             : ""
                     }
 
+                    <span class="recipe-card-read-more">
+                        View recipe →
+                    </span>
+
                 </div>
 
             </article>
-        `;
 
-    }).join("");
+        </a>
+    `;
+
+}).join("");
+```
+
 }
 
+function handleSearch(event) {
 
-/* -----------------------------------------
-   Basic HTML Escaping
-   -----------------------------------------
+```
+const searchTerm =
+    event.target.value
+        .trim()
+        .toLowerCase();
 
-   Recipe data comes from the database.
-   Never insert database content directly
-   into innerHTML without escaping it.
-   ----------------------------------------- */
+if (!searchTerm) {
+
+    displayRecipes(allRecipes);
+
+    return;
+}
+
+const filteredRecipes =
+    allRecipes.filter(recipe => {
+
+        const title =
+            recipe.title || "";
+
+        const description =
+            recipe.description || "";
+
+        const category =
+            recipe.category || "";
+
+        return (
+            title.toLowerCase().includes(searchTerm) ||
+            description.toLowerCase().includes(searchTerm) ||
+            category.toLowerCase().includes(searchTerm)
+        );
+
+    });
+
+displayRecipes(filteredRecipes);
+```
+
+}
+
+function displayLoadError() {
+
+```
+const grid =
+    document.getElementById("recipe-grid");
+
+const count =
+    document.getElementById("recipe-count");
+
+if (count) {
+    count.textContent = "";
+}
+
+if (!grid) {
+    return;
+}
+
+grid.innerHTML = `
+    <div class="empty-state">
+        <h3>Unable to load recipes.</h3>
+
+        <p>
+            Please try refreshing the page.
+        </p>
+    </div>
+`;
+```
+
+}
 
 function escapeHtml(value) {
 
-    if (value === null || value === undefined) {
-        return "";
-    }
+```
+if (value === null || value === undefined) {
+    return "";
+}
 
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+```
+
 }
