@@ -1,5 +1,8 @@
 let currentUser = null;
 let currentProfile = null;
+let editingRecipe = null;
+
+const isEditPage = window.location.pathname.endsWith("edit-recipe.html");
 
 document.addEventListener("DOMContentLoaded", async () => {
   setCurrentYear();
@@ -7,39 +10,122 @@ document.addEventListener("DOMContentLoaded", async () => {
   currentUser = await getCurrentUser();
   currentProfile = await getCurrentProfile();
 
-  // Must be logged in.
   if (!currentUser) {
     window.location.href = "login.html";
     return;
   }
 
-  // Must have an approved profile.
   if (!currentProfile || !currentProfile.approved) {
     window.location.href = "index.html";
     return;
   }
 
-  initializeRecipeForm();
+  if (isEditPage) {
+    await initializeEditForm();
+  } else {
+    initializeAddForm();
+  }
 });
 
 
-function initializeRecipeForm() {
+function initializeAddForm() {
   const form = document.getElementById("recipe-form");
   const addIngredientButton = document.getElementById("add-ingredient");
   const imageInput = document.getElementById("recipe-image");
 
   if (!form) return;
 
-  // Start with one empty ingredient.
   addIngredient();
 
   addIngredientButton.addEventListener("click", () => {
-  addIngredient();
-});
+    addIngredient();
+  });
 
   imageInput.addEventListener("change", handleImagePreview);
 
   form.addEventListener("submit", handleRecipeSubmit);
+}
+
+
+async function initializeEditForm() {
+  const recipeId = new URLSearchParams(window.location.search).get("id");
+
+  if (!recipeId) {
+    showRecipeFormMessage("No recipe was specified.", "error");
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("recipes")
+    .select("*")
+    .eq("id", recipeId)
+    .single();
+
+  if (error || !data) {
+    console.error("Error loading recipe for editing:", error);
+    showRecipeFormMessage("Unable to load this recipe.", "error");
+    return;
+  }
+
+  editingRecipe = data;
+
+  // Normal users may edit only their own recipes.
+  if (
+    !currentProfile.is_admin &&
+    data.created_by !== currentUser.id
+  ) {
+    window.location.href = `recipe.html?id=${encodeURIComponent(recipeId)}`;
+    return;
+  }
+
+  populateRecipeForm(data);
+
+  const form = document.getElementById("recipe-form");
+  const addIngredientButton = document.getElementById("add-ingredient");
+  const imageInput = document.getElementById("recipe-image");
+
+  addIngredientButton.addEventListener("click", () => {
+    addIngredient();
+  });
+
+  imageInput.addEventListener("change", handleImagePreview);
+
+  form.addEventListener("submit", handleRecipeSubmit);
+}
+
+
+function populateRecipeForm(recipe) {
+  document.getElementById("recipe-title").value = recipe.title || "";
+  document.getElementById("recipe-description").value = recipe.description || "";
+  document.getElementById("recipe-category").value = recipe.category || "";
+  document.getElementById("recipe-servings").value = recipe.servings ?? "";
+  document.getElementById("recipe-prep-time").value = recipe.prep_time ?? "";
+  document.getElementById("recipe-cook-time").value = recipe.cook_time ?? "";
+  document.getElementById("recipe-instructions").value = recipe.instructions || "";
+  document.getElementById("recipe-notes").value = recipe.notes || "";
+
+  const ingredientsList = document.getElementById("ingredients-list");
+  ingredientsList.innerHTML = "";
+
+  const ingredients = Array.isArray(recipe.ingredients)
+    ? recipe.ingredients
+    : [];
+
+  if (ingredients.length === 0) {
+    addIngredient();
+  } else {
+    ingredients.forEach((ingredient) => {
+      addIngredient(ingredient);
+    });
+  }
+
+  if (recipe.image_url) {
+    const preview = document.getElementById("image-preview");
+    const container = document.getElementById("image-preview-container");
+
+    preview.src = recipe.image_url;
+    container.classList.add("visible");
+  }
 }
 
 
@@ -65,7 +151,6 @@ function addIngredient(value = "") {
   removeButton.addEventListener("click", () => {
     row.remove();
 
-    // Always keep at least one ingredient field.
     const remaining = list.querySelectorAll(".ingredient-row");
 
     if (remaining.length === 0) {
@@ -77,8 +162,6 @@ function addIngredient(value = "") {
   row.appendChild(removeButton);
 
   list.appendChild(row);
-
-  input.focus();
 }
 
 
@@ -88,8 +171,6 @@ function handleImagePreview(event) {
   const container = document.getElementById("image-preview-container");
 
   if (!file) {
-    preview.removeAttribute("src");
-    container.classList.remove("visible");
     return;
   }
 
@@ -118,14 +199,14 @@ async function handleRecipeSubmit(event) {
   const saveButton = document.getElementById("save-recipe");
 
   saveButton.disabled = true;
-  saveButton.textContent = "Saving...";
+  saveButton.textContent = isEditPage ? "Saving Changes..." : "Saving...";
 
   try {
     const formData = collectRecipeFormData();
 
     validateRecipeFormData(formData);
 
-    let imageUrl = null;
+    let imageUrl = editingRecipe?.image_url || null;
 
     const imageFile = document.getElementById("recipe-image").files[0];
 
@@ -133,30 +214,53 @@ async function handleRecipeSubmit(event) {
       imageUrl = await uploadRecipeImage(imageFile);
     }
 
-    const { data, error } = await supabaseClient
-      .from("recipes")
-      .insert({
-        title: formData.title,
-        description: formData.description,
-        category: formData.category,
-        servings: formData.servings,
-        prep_time: formData.prep_time,
-        cook_time: formData.cook_time,
-        ingredients: formData.ingredients,
-        instructions: formData.instructions,
-        notes: formData.notes,
-        image_url: imageUrl,
-        created_by: currentUser.id
-      })
-      .select("id")
-      .single();
+    const recipeData = {
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      servings: formData.servings,
+      prep_time: formData.prep_time,
+      cook_time: formData.cook_time,
+      ingredients: formData.ingredients,
+      instructions: formData.instructions,
+      notes: formData.notes,
+      image_url: imageUrl
+    };
 
-    if (error) {
-      console.error("Error saving recipe:", error);
-      throw new Error("Unable to save the recipe.");
+    let recipeId;
+
+    if (isEditPage) {
+      recipeId = editingRecipe.id;
+
+      const { error } = await supabaseClient
+        .from("recipes")
+        .update(recipeData)
+        .eq("id", recipeId);
+
+      if (error) {
+        console.error("Error updating recipe:", error);
+        throw new Error("Unable to update the recipe.");
+      }
+
+    } else {
+      const { data, error } = await supabaseClient
+        .from("recipes")
+        .insert({
+          ...recipeData,
+          created_by: currentUser.id
+        })
+        .select("id")
+        .single();
+
+      if (error) {
+        console.error("Error saving recipe:", error);
+        throw new Error("Unable to save the recipe.");
+      }
+
+      recipeId = data.id;
     }
 
-    window.location.href = `recipe.html?id=${encodeURIComponent(data.id)}`;
+    window.location.href = `recipe.html?id=${encodeURIComponent(recipeId)}`;
 
   } catch (error) {
     console.error("Recipe save error:", error);
@@ -167,7 +271,9 @@ async function handleRecipeSubmit(event) {
     );
 
     saveButton.disabled = false;
-    saveButton.textContent = "Save Recipe";
+    saveButton.textContent = isEditPage
+      ? "Save Changes"
+      : "Save Recipe";
   }
 }
 
@@ -203,7 +309,7 @@ function collectRecipeFormData() {
     servings: numberOrNull("recipe-servings"),
     prep_time: numberOrNull("recipe-prep-time"),
     cook_time: numberOrNull("recipe-cook-time"),
-    ingredients: ingredients,
+    ingredients,
     instructions: getValue("recipe-instructions"),
     notes: getValue("recipe-notes") || null
   };
@@ -250,12 +356,10 @@ async function uploadRecipeImage(file) {
   const fileExtension = getImageExtension(file);
   const fileName = `${crypto.randomUUID()}.${fileExtension}`;
 
-  const filePath = fileName;
-
   const { error: uploadError } = await supabaseClient
     .storage
     .from("recipe-images")
-    .upload(filePath, file, {
+    .upload(fileName, file, {
       cacheControl: "3600",
       upsert: false
     });
@@ -270,7 +374,7 @@ async function uploadRecipeImage(file) {
   } = supabaseClient
     .storage
     .from("recipe-images")
-    .getPublicUrl(filePath);
+    .getPublicUrl(fileName);
 
   return publicUrlData.publicUrl;
 }
