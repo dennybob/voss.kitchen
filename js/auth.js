@@ -3,16 +3,11 @@
    Authentication
    ========================================= */
 
+
 async function getCurrentUser() {
 	const {
-		data: { user },
-		error
+		data: { user }
 	} = await supabaseClient.auth.getUser();
-
-	if (error) {
-		console.error("Error getting current user:", error);
-		return null;
-	}
 
 	return user;
 }
