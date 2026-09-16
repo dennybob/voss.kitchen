@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	loadRecipes();
 
+	updateAuthNavigation();
+
 	const searchInput =
 		document.getElementById("recipe-search");
 
