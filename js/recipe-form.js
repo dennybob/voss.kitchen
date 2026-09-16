@@ -33,7 +33,9 @@ function initializeRecipeForm() {
   // Start with one empty ingredient.
   addIngredient();
 
-  addIngredientButton.addEventListener("click", addIngredient);
+  addIngredientButton.addEventListener("click", () => {
+  addIngredient();
+});
 
   imageInput.addEventListener("change", handleImagePreview);
 
