@@ -12,183 +12,226 @@
 <body>
 
   <header class="site-header">
-    <div class="site-header-inner">
+    <div class="container header-inner">
 
       <a class="site-logo" href="index.html">Voss Kitchen</a>
 
-      <nav class="site-nav">
-        <a href="index.html">Recipes</a>
-        <a href="add-recipe.html">Add Recipe</a>
-        <a href="login.html" id="auth-nav-link">Log In</a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="index.html" class="nav-link">Recipes</a>
+        <a href="add-recipe.html" class="nav-link">Add Recipe</a>
+        <a href="login.html" class="nav-link" id="auth-nav-link">Log In</a>
       </nav>
 
     </div>
   </header>
 
-  <main class="site-main">
+  <main class="container">
 
     <div class="page-heading">
       <h1>Edit Recipe</h1>
       <p>Update the recipe information below.</p>
     </div>
 
-    <form id="recipe-form" class="recipe-form">
+  <main class="container">
 
-      <section class="recipe-form-section">
-        <h2>Basic Information</h2>
+    <section class="recipe-form-section">
 
-        <div class="form-grid">
+      <div class="recipe-form-header">
+        <p class="eyebrow">Recipe Management</p>
+        <h1>Edit Recipe</h1>
+        <p>Update your recipe information</p>
+      </div>
 
-          <div class="form-group form-group-full">
-            <label for="recipe-title">Recipe Title *</label>
+      <div id="recipe-form-message" class="auth-message"></div>
+
+
+      <form id="recipe-form" class="recipe-form" novalidate>
+
+        <!-- Basic Information -->
+        <fieldset>
+          <legend>Basic Information</legend>
+
+          <div class="form-field">
+            <label for="recipe-title">Title *</label>
             <input
               type="text"
               id="recipe-title"
-              maxlength="200"
+              name="title"
               required
+              maxlength="200"
+              autocomplete="off"
             >
           </div>
 
-          <div class="form-group form-group-full">
+          <div class="form-field">
             <label for="recipe-description">Description</label>
             <textarea
               id="recipe-description"
+              name="description"
               rows="3"
               maxlength="1000"
             ></textarea>
           </div>
 
-          <div class="form-group">
+          <div class="form-field">
             <label for="recipe-category">Category</label>
             <input
               type="text"
               id="recipe-category"
+              name="category"
               maxlength="100"
+              placeholder="Bread, Main Dish, Dessert..."
+              autocomplete="off"
             >
           </div>
 
-          <div class="form-group">
-            <label for="recipe-servings">Servings</label>
-            <input
-              type="number"
-              id="recipe-servings"
-              min="1"
-              step="1"
-            >
+          <div class="form-grid">
+
+            <div class="form-field">
+              <label for="recipe-servings">Servings</label>
+              <input
+                type="number"
+                id="recipe-servings"
+                name="servings"
+                min="1"
+                step="1"
+              >
+            </div>
+
+            <div class="form-field">
+              <label for="recipe-prep-time">Prep Time (minutes)</label>
+              <input
+                type="number"
+                id="recipe-prep-time"
+                name="prep_time"
+                min="0"
+                step="1"
+              >
+            </div>
+
+            <div class="form-field">
+              <label for="recipe-cook-time">Cook Time (minutes)</label>
+              <input
+                type="number"
+                id="recipe-cook-time"
+                name="cook_time"
+                min="0"
+                step="1"
+              >
+            </div>
+
           </div>
-
-          <div class="form-group">
-            <label for="recipe-prep-time">Prep Time (minutes)</label>
-            <input
-              type="number"
-              id="recipe-prep-time"
-              min="0"
-              step="1"
-            >
-          </div>
-
-          <div class="form-group">
-            <label for="recipe-cook-time">Cook Time (minutes)</label>
-            <input
-              type="number"
-              id="recipe-cook-time"
-              min="0"
-              step="1"
-            >
-          </div>
-
-        </div>
-      </section>
+        </fieldset>
 
 
-      <section class="recipe-form-section">
-        <h2>Ingredients</h2>
+        <!-- Ingredients -->
+        <fieldset>
+          <legend>Ingredients</legend>
 
-        <div id="ingredients-list" class="ingredients-list"></div>
+          <p class="form-help">
+            Add each ingredient as a separate line.
+          </p>
 
-        <button
-          type="button"
-          id="add-ingredient"
-          class="secondary-button"
-        >
-          + Add Ingredient
-        </button>
-      </section>
+          <div id="ingredients-list" class="ingredients-list"></div>
 
-
-      <section class="recipe-form-section">
-        <h2>Instructions</h2>
-
-        <div class="form-group">
-          <label for="recipe-instructions">Cooking Instructions *</label>
-          <textarea
-            id="recipe-instructions"
-            rows="12"
-            required
-          ></textarea>
-        </div>
-      </section>
-
-
-      <section class="recipe-form-section">
-        <h2>Notes</h2>
-
-        <div class="form-group">
-          <label for="recipe-notes">Additional Notes</label>
-          <textarea
-            id="recipe-notes"
-            rows="5"
-          ></textarea>
-        </div>
-      </section>
-
-
-      <section class="recipe-form-section">
-        <h2>Recipe Image</h2>
-
-        <div class="form-group">
-          <label for="recipe-image">Replace Image</label>
-          <input
-            type="file"
-            id="recipe-image"
-            accept="image/jpeg,image/png,image/webp"
+          <button
+            type="button"
+            id="add-ingredient"
+            class="secondary-button"
           >
-          <small>
-            Leave blank to keep the existing image.
-          </small>
+            + Add Ingredient
+          </button>
+        </fieldset>
+
+
+        <!-- Instructions -->
+        <fieldset>
+          <legend>Instructions</legend>
+
+          <div class="form-field">
+            <label for="recipe-instructions">Cooking Instructions *</label>
+            <textarea
+              id="recipe-instructions"
+              name="instructions"
+              rows="12"
+              required
+            ></textarea>
+          </div>
+        </fieldset>
+
+
+        <!-- Notes -->
+        <fieldset>
+          <legend>Notes</legend>
+
+          <div class="form-field">
+            <label for="recipe-notes">Additional Notes</label>
+            <textarea
+              id="recipe-notes"
+              name="notes"
+              rows="5"
+            ></textarea>
+          </div>
+        </fieldset>
+
+
+        <!-- Image -->
+        <fieldset>
+          <legend>Recipe Image</legend>
+
+          <div class="form-field">
+            <label for="recipe-image">Image</label>
+
+            <input
+              type="file"
+              id="recipe-image"
+              name="image"
+              accept="image/jpeg,image/png,image/webp"
+            >
+
+            <p class="form-help">
+              JPG, PNG, or WebP.
+            </p>
+          </div>
+
+          <div id="image-preview-container" class="image-preview-container">
+            <img
+              id="image-preview"
+              class="image-preview"
+              alt="Recipe image preview"
+            >
+          </div>
+        </fieldset>
+
+
+        <!-- Form Actions -->
+        <div class="recipe-form-actions">
+
+          <a href="index.html" class="secondary-button">
+            Cancel
+          </a>
+
+          <button
+            type="submit"
+            id="save-recipe"
+            class="primary-button"
+          >
+            Save Recipe
+          </button>
+
         </div>
 
-        <div
-          id="image-preview-container"
-          class="image-preview-container"
-        >
-          <img id="image-preview" alt="Recipe image preview">
-        </div>
-      </section>
+      </form>
 
-
-      <div id="recipe-form-message" class="auth-message"></div>
-
-
-      <div class="recipe-form-actions">
-        <a href="index.html" class="secondary-button">Cancel</a>
-
-        <button
-          type="submit"
-          id="save-recipe"
-          class="primary-button"
-        >
-          Save Changes
-        </button>
-      </div>
-
-    </form>
+    </section>
 
   </main>
 
 
   <footer class="site-footer">
-    <p>&copy; <span id="current-year"></span> Voss Kitchen</p>
+    <div class="container">
+      <p>&copy; <span id="current-year"></span> Voss Kitchen</p>
+    </div>
   </footer>
 
 
