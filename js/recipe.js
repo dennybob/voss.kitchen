@@ -6,27 +6,27 @@ const supabaseClient = window.supabase.createClient(
 	SUPABASE_PUBLISHABLE_KEY
 );
 
-document.addEventListener("DOMContentLoaded", () => {
+let currentUser = null;
+let currentProfile = null;
+
+document.addEventListener("DOMContentLoaded", async () => {
 	setCurrentYear();
+
+	currentUser = await getCurrentUser();
+	currentProfile = await getCurrentProfile();
+
 	loadRecipe();
 });
 
 function setCurrentYear() {
-	const yearElement =
-		document.getElementById("current-year");
-
+	const yearElement = document.getElementById("current-year");
 
 	if (yearElement) {
-		yearElement.textContent =
-			new Date().getFullYear();
+		yearElement.textContent = new Date().getFullYear();
 	}
-
-
 }
 
 async function loadRecipe() {
-
-
 	const recipeId = getRecipeIdFromUrl();
 
 	if (!recipeId) {
@@ -55,44 +55,27 @@ async function loadRecipe() {
 	}
 
 	displayRecipe(recipe);
-
-
 }
 
 function getRecipeIdFromUrl() {
-
-
-	const params = new URLSearchParams(
-		window.location.search
-	);
-
+	const params = new URLSearchParams(window.location.search);
 	return params.get("id");
-
-
 }
 
 function displayRecipe(recipe) {
-
-
-	const container =
-		document.getElementById("recipe-detail");
+	const container = document.getElementById("recipe-detail");
 
 	if (!container) {
 		return;
 	}
 
-	document.title =
-		`${recipe.title} | Voss Kitchen`;
+	document.title = `${recipe.title} | Voss Kitchen`;
 
-	const category =
-		recipe.category || "Recipe";
+	const category = recipe.category || "Recipe";
+	const description = recipe.description || "";
 
-	const description =
-		recipe.description || "";
-
-	const imageHtml =
-		recipe.image_url
-			? `
+	const imageHtml = recipe.image_url
+		? `
             <div class="recipe-detail-image">
                 <img
                     src="${escapeHtml(recipe.image_url)}"
@@ -100,7 +83,7 @@ function displayRecipe(recipe) {
                 >
             </div>
           `
-			: "";
+		: "";
 
 	const metadataItems = [];
 
@@ -137,14 +120,12 @@ function displayRecipe(recipe) {
     `);
 	}
 
-	const ingredients =
-		Array.isArray(recipe.ingredients)
-			? recipe.ingredients
-			: [];
+	const ingredients = Array.isArray(recipe.ingredients)
+		? recipe.ingredients
+		: [];
 
-	const ingredientsHtml =
-		ingredients.length > 0
-			? `
+	const ingredientsHtml = ingredients.length > 0
+		? `
             <ul class="ingredients-list">
                 ${ingredients.map(ingredient => `
                     <li>
@@ -153,18 +134,16 @@ function displayRecipe(recipe) {
                 `).join("")}
             </ul>
           `
-			: `
+		: `
             <p class="recipe-placeholder">
                 No ingredients have been added yet.
             </p>
           `;
 
-	const instructionsHtml =
-		formatInstructions(recipe.instructions);
+	const instructionsHtml = formatInstructions(recipe.instructions);
 
-	const notesHtml =
-		recipe.notes
-			? `
+	const notesHtml = recipe.notes
+		? `
             <section class="recipe-notes">
                 <h2>Notes</h2>
                 <div class="recipe-notes-text">
@@ -172,7 +151,35 @@ function displayRecipe(recipe) {
                 </div>
             </section>
           `
-			: "";
+		: "";
+
+	const canManageRecipe =
+		currentProfile &&
+		(
+			currentProfile.is_admin ||
+			(currentUser && recipe.created_by === currentUser.id)
+		);
+
+	const actionsHtml = canManageRecipe
+		? `
+            <div class="recipe-actions">
+                <a
+                    href="edit-recipe.html?id=${encodeURIComponent(recipe.id)}"
+                    class="secondary-button"
+                >
+                    Edit Recipe
+                </a>
+
+                <button
+                    type="button"
+                    id="delete-recipe-button"
+                    class="danger-button"
+                >
+                    Delete Recipe
+                </button>
+            </div>
+          `
+		: "";
 
 	container.innerHTML = `
     <article class="recipe-detail">
@@ -211,6 +218,8 @@ function displayRecipe(recipe) {
 			: ""
 		}
 
+            ${actionsHtml}
+
             <div class="recipe-columns">
 
                 <section class="recipe-ingredients">
@@ -234,14 +243,53 @@ function displayRecipe(recipe) {
     </article>
 `;
 
+	if (canManageRecipe) {
+		document
+			.getElementById("delete-recipe-button")
+			.addEventListener("click", () => {
+				deleteRecipe(recipe);
+			});
+	}
+}
 
+async function deleteRecipe(recipe) {
+	const confirmed = window.confirm(
+		`Are you sure you want to delete "${recipe.title}"?\n\nThis action cannot be undone.`
+	);
+
+	if (!confirmed) {
+		return;
+	}
+
+	const button = document.getElementById("delete-recipe-button");
+
+	if (button) {
+		button.disabled = true;
+		button.textContent = "Deleting...";
+	}
+
+	const { error } = await supabaseClient
+		.from("recipes")
+		.delete()
+		.eq("id", recipe.id);
+
+	if (error) {
+		console.error("Error deleting recipe:", error);
+
+		if (button) {
+			button.disabled = false;
+			button.textContent = "Delete Recipe";
+		}
+
+		alert("Unable to delete this recipe. Please try again.");
+		return;
+	}
+
+	window.location.href = "index.html";
 }
 
 function displayRecipeError(title, message) {
-
-
-	const container =
-		document.getElementById("recipe-detail");
+	const container = document.getElementById("recipe-detail");
 
 	if (!container) {
 		return;
@@ -256,13 +304,9 @@ function displayRecipeError(title, message) {
         </a>
     </div>
 `;
-
-
 }
 
 function formatIngredient(ingredient) {
-
-
 	if (typeof ingredient === "string") {
 		return escapeHtml(ingredient);
 	}
@@ -271,14 +315,9 @@ function formatIngredient(ingredient) {
 		return "";
 	}
 
-	const quantity =
-		ingredient.quantity || "";
-
-	const unit =
-		ingredient.unit || "";
-
-	const name =
-		ingredient.name || ingredient.ingredient || "";
+	const quantity = ingredient.quantity || "";
+	const unit = ingredient.unit || "";
+	const name = ingredient.name || ingredient.ingredient || "";
 
 	const parts = [
 		quantity,
@@ -287,13 +326,9 @@ function formatIngredient(ingredient) {
 	].filter(Boolean);
 
 	return escapeHtml(parts.join(" "));
-
-
 }
 
 function formatInstructions(instructions) {
-
-
 	if (!instructions) {
 		return `
         <p class="recipe-placeholder">
@@ -302,34 +337,23 @@ function formatInstructions(instructions) {
     `;
 	}
 
-	const text =
-		String(instructions);
-
-	const paragraphs =
-		text.split(/\n\s*\n/);
+	const text = String(instructions);
+	const paragraphs = text.split(/\n\s*\n/);
 
 	return paragraphs.map(paragraph => `
     <p>
         ${escapeHtml(paragraph).replace(/\n/g, "<br>")}
     </p>
 `).join("");
-
-
 }
 
 function formatMultilineText(text) {
-
-
 	return escapeHtml(String(text))
 		.replace(/\n\s*\n/g, "</p><p>")
 		.replace(/\n/g, "<br>");
-
-
 }
 
 function escapeHtml(value) {
-
-
 	if (value === null || value === undefined) {
 		return "";
 	}
@@ -340,6 +364,4 @@ function escapeHtml(value) {
 		.replaceAll(">", "&gt;")
 		.replaceAll('"', "&quot;")
 		.replaceAll("'", "&#039;");
-
-
 }
