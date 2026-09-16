@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin | Voss Kitchen</title>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+
+      <a href="index.html" class="site-logo">
+        Voss Kitchen
+      </a>
+
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="index.html" class="nav-link">Recipes</a>
+        <a href="#" class="nav-link">About</a>
+        <a href="admin.html" class="nav-link active">Admin</a>
+        <a href="#" class="nav-link" id="auth-nav-link">Log In</a>
+      </nav>
+
+    </div>
+  </header>
+
+
+  <main class="container">
+
+    <section class="admin-section">
+
+      <div class="admin-header">
+        <div>
+          <p class="eyebrow">Administration</p>
+          <h1>Kitchen Admin</h1>
+          <p id="admin-welcome">Loading...</p>
+        </div>
+      </div>
+
+
+      <!-- Access message -->
+      <div id="admin-message" class="auth-message"></div>
+
+
+      <!-- User Management -->
+      <section id="users-section" class="admin-panel">
+
+        <div class="admin-panel-header">
+          <div>
+            <h2>User Management</h2>
+            <p>Approve users and manage administrator access.</p>
+          </div>
+        </div>
+
+        <div id="users-loading" class="admin-loading">
+          Loading users...
+        </div>
+
+        <div id="users-container"></div>
+
+      </section>
+
+
+      <!-- Recipe Management -->
+      <section id="recipes-section" class="admin-panel">
+
+        <div class="admin-panel-header">
+          <div>
+            <h2>Recipe Management</h2>
+            <p>View, edit, and remove recipes.</p>
+          </div>
+        </div>
+
+        <div id="admin-recipes-loading" class="admin-loading">
+          Loading recipes...
+        </div>
+
+        <div id="admin-recipes-container"></div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="current-year"></span> Voss Kitchen</p>
+    </div>
+  </footer>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+
+</body>
+</html>
