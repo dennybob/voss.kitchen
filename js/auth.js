@@ -37,6 +37,8 @@ async function getCurrentProfile() {
 
 async function updateAuthNavigation() {
 	const authLink = document.getElementById("auth-nav-link");
+	const addRecipeLink = document.getElementById("add-recipe-nav-link");
+	const adminLink = document.getElementById("admin-nav-link");
 
 	if (!authLink) {
 		return;
@@ -44,13 +46,32 @@ async function updateAuthNavigation() {
 
 	const user = await getCurrentUser();
 
+	/*
+	 * Visitor
+	 */
 	if (!user) {
 		authLink.textContent = "Log In";
 		authLink.href = "login.html";
 		authLink.onclick = null;
+
+		if (addRecipeLink) {
+			addRecipeLink.style.display = "none";
+		}
+
+		if (adminLink) {
+			adminLink.style.display = "none";
+		}
+
 		return;
 	}
 
+
+	const profile = await getCurrentProfile();
+
+
+	/*
+	 * Logged-in user
+	 */
 	authLink.textContent = "Log Out";
 	authLink.href = "#";
 
@@ -66,6 +87,24 @@ async function updateAuthNavigation() {
 
 		window.location.href = "index.html";
 	};
+
+
+	/*
+	 * Add Recipe is available only to approved users.
+	 */
+	if (addRecipeLink) {
+		addRecipeLink.style.display =
+			profile && profile.approved ? "" : "none";
+	}
+
+
+	/*
+	 * Admin dashboard is available only to administrators.
+	 */
+	if (adminLink) {
+		adminLink.style.display =
+			profile && profile.is_admin ? "" : "none";
+	}
 }
 
 
