@@ -192,89 +192,167 @@ function handleImagePreview(event) {
 
 
 async function handleRecipeSubmit(event) {
-  event.preventDefault();
+	event.preventDefault();
 
-  clearRecipeFormMessage();
+	clearRecipeFormMessage();
 
-  const saveButton = document.getElementById("save-recipe");
+	const saveButton = document.getElementById("save-recipe");
 
-  saveButton.disabled = true;
-  saveButton.textContent = isEditPage ? "Saving Changes..." : "Saving...";
+	saveButton.disabled = true;
+	saveButton.textContent = isEditPage ? "Saving Changes..." : "Saving...";
 
-  try {
-    const formData = collectRecipeFormData();
+	let newImageUrl = null;
 
-    validateRecipeFormData(formData);
+	try {
+		const formData = collectRecipeFormData();
 
-    let imageUrl = editingRecipe?.image_url || null;
+		validateRecipeFormData(formData);
 
-    const imageFile = document.getElementById("recipe-image").files[0];
+		const imageFile = document.getElementById("recipe-image").files[0];
 
-    if (imageFile) {
-      imageUrl = await uploadRecipeImage(imageFile);
-    }
+		/*
+		 * Keep track of the existing image so we can remove it
+		 * only after a successful database update.
+		 */
+		const oldImageUrl = editingRecipe?.image_url || null;
 
-    const recipeData = {
-      title: formData.title,
-      description: formData.description,
-      category: formData.category,
-      servings: formData.servings,
-      prep_time: formData.prep_time,
-      cook_time: formData.cook_time,
-      ingredients: formData.ingredients,
-      instructions: formData.instructions,
-      notes: formData.notes,
-      image_url: imageUrl
-    };
+		let imageUrl = oldImageUrl;
 
-    let recipeId;
+		/*
+		 * Upload the replacement image first.
+		 *
+		 * We deliberately do not delete the old image yet.
+		 */
+		if (imageFile) {
+			newImageUrl = await uploadRecipeImage(imageFile);
+			imageUrl = newImageUrl;
+		}
 
-    if (isEditPage) {
-      recipeId = editingRecipe.id;
+		const recipeData = {
+			title: formData.title,
+			description: formData.description,
+			category: formData.category,
+			servings: formData.servings,
+			prep_time: formData.prep_time,
+			cook_time: formData.cook_time,
+			ingredients: formData.ingredients,
+			instructions: formData.instructions,
+			notes: formData.notes,
+			image_url: imageUrl
+		};
 
-      const { error } = await supabaseClient
-        .from("recipes")
-        .update(recipeData)
-        .eq("id", recipeId);
+		let recipeId;
 
-      if (error) {
-        console.error("Error updating recipe:", error);
-        throw new Error("Unable to update the recipe.");
-      }
+		if (isEditPage) {
+			recipeId = editingRecipe.id;
 
-    } else {
-      const { data, error } = await supabaseClient
-        .from("recipes")
-        .insert({
-          ...recipeData,
-          created_by: currentUser.id
-        })
-        .select("id")
-        .single();
+			const { error } = await supabaseClient
+				.from("recipes")
+				.update(recipeData)
+				.eq("id", recipeId);
 
-      if (error) {
-        console.error("Error saving recipe:", error);
-        throw new Error("Unable to save the recipe.");
-      }
+			if (error) {
+				console.error("Error updating recipe:", error);
+				throw new Error("Unable to update the recipe.");
+			}
 
-      recipeId = data.id;
-    }
+			/*
+			 * The database now points to the new image.
+			 * It is safe to remove the old image.
+			 */
+			if (newImageUrl && oldImageUrl) {
+				await deleteRecipeImage(oldImageUrl);
+			}
 
-    window.location.href = `recipe.html?id=${encodeURIComponent(recipeId)}`;
+		} else {
+			const { data, error } = await supabaseClient
+				.from("recipes")
+				.insert({
+					...recipeData,
+					created_by: currentUser.id
+				})
+				.select("id")
+				.single();
 
-  } catch (error) {
-    console.error("Recipe save error:", error);
+			if (error) {
+				console.error("Error saving recipe:", error);
+				throw new Error("Unable to save the recipe.");
+			}
 
-    showRecipeFormMessage(
-      error.message || "Unable to save the recipe.",
-      "error"
-    );
+			recipeId = data.id;
+		}
 
-    saveButton.disabled = false;
-    saveButton.textContent = isEditPage
-      ? "Save Changes"
-      : "Save Recipe";
-  }
+		/*
+		 * Success.
+		 */
+		window.location.href =
+			`recipe.html?id=${encodeURIComponent(recipeId)}`;
+
+	} catch (error) {
+		console.error("Recipe save error:", error);
+
+		/*
+		 * If we uploaded a new image but the database operation
+		 * failed, remove the new image so it does not become orphaned.
+		 */
+		if (newImageUrl) {
+			await deleteRecipeImage(newImageUrl);
+		}
+
+		showRecipeFormMessage(
+			error.message || "Unable to save the recipe.",
+			"error"
+		);
+
+		saveButton.disabled = false;
+		saveButton.textContent = isEditPage
+			? "Save Changes"
+			: "Save Recipe";
+	}
+}
+
+
+async function deleteRecipeImage(imageUrl) {
+	const imagePath = getRecipeImagePath(imageUrl);
+
+	if (!imagePath) {
+		return;
+	}
+
+	const { error } = await supabaseClient
+		.storage
+		.from("recipe-images")
+		.remove([imagePath]);
+
+	if (error) {
+		console.error(
+			"Unable to delete recipe image from Storage:",
+			error
+		);
+	}
+}
+
+
+function getRecipeImagePath(imageUrl) {
+	try {
+		const url = new URL(imageUrl);
+
+		const marker = "/storage/v1/object/public/recipe-images/";
+
+		const index = url.pathname.indexOf(marker);
+
+		if (index === -1) {
+			return null;
+		}
+
+		return decodeURIComponent(
+			url.pathname.substring(index + marker.length)
+		);
+
+	} catch (error) {
+		console.error("Unable to determine recipe image path:", error);
+		return null;
+	}
 }
 
 

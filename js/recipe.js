@@ -268,13 +268,16 @@ async function deleteRecipe(recipe) {
 		button.textContent = "Deleting...";
 	}
 
-	const { error } = await supabaseClient
+	/*
+	 * Delete the recipe record first.
+	 */
+	const { error: deleteError } = await supabaseClient
 		.from("recipes")
 		.delete()
 		.eq("id", recipe.id);
 
-	if (error) {
-		console.error("Error deleting recipe:", error);
+	if (deleteError) {
+		console.error("Error deleting recipe:", deleteError);
 
 		if (button) {
 			button.disabled = false;
@@ -285,7 +288,54 @@ async function deleteRecipe(recipe) {
 		return;
 	}
 
+	/*
+	 * If the recipe had an image, remove it from Storage.
+	 *
+	 * The database record is already gone at this point, so
+	 * failure here cannot leave the recipe itself in a bad state.
+	 */
+	if (recipe.image_url) {
+		const imagePath = getRecipeImagePath(recipe.image_url);
+
+		if (imagePath) {
+			const { error: storageError } = await supabaseClient
+				.storage
+				.from("recipe-images")
+				.remove([imagePath]);
+
+			if (storageError) {
+				console.error(
+					"Recipe deleted, but image cleanup failed:",
+					storageError
+				);
+			}
+		}
+	}
+
 	window.location.href = "index.html";
+}
+
+
+function getRecipeImagePath(imageUrl) {
+	try {
+		const url = new URL(imageUrl);
+
+		const marker = "/storage/v1/object/public/recipe-images/";
+
+		const index = url.pathname.indexOf(marker);
+
+		if (index === -1) {
+			return null;
+		}
+
+		return decodeURIComponent(
+			url.pathname.substring(index + marker.length)
+		);
+
+	} catch (error) {
+		console.error("Unable to determine recipe image path:", error);
+		return null;
+	}
 }
 
 function displayRecipeError(title, message) {
