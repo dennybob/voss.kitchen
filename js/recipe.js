@@ -162,26 +162,39 @@ function displayRecipe(recipe) {
 			(currentUser && recipe.created_by === currentUser.id)
 		);
 
-	const actionsHtml = canManageRecipe
-		? `
+		const actionsHtml = `
             <div class="recipe-actions">
-                <a
-                    href="edit-recipe.html?id=${encodeURIComponent(recipe.id)}"
-                    class="secondary-button"
-                >
-                    Edit Recipe
-                </a>
 
                 <button
                     type="button"
-                    id="delete-recipe-button"
-                    class="danger-button"
+                    id="print-recipe-button"
+                    class="secondary-button"
                 >
-                    Delete Recipe
+                    Print Recipe
                 </button>
+
+                ${canManageRecipe
+			? `
+                        <a
+                            href="edit-recipe.html?id=${encodeURIComponent(recipe.id)}"
+                            class="secondary-button"
+                        >
+                            Edit Recipe
+                        </a>
+
+                        <button
+                            type="button"
+                            id="delete-recipe-button"
+                            class="danger-button"
+                        >
+                            Delete Recipe
+                        </button>
+                      `
+			: ""
+		}
+
             </div>
-          `
-		: "";
+          `;
 
 	container.innerHTML = `
     <article class="recipe-detail">
@@ -244,6 +257,14 @@ function displayRecipe(recipe) {
 
     </article>
 `;
+
+	const printButton = document.getElementById("print-recipe-button");
+
+	if (printButton) {
+		printButton.addEventListener("click", () => {
+			window.print();
+		});
+	}
 
 	if (canManageRecipe) {
 		document
