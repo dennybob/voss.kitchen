@@ -80,6 +80,8 @@ function displayRecipe(recipe) {
                 <img
                     src="${escapeHtml(recipe.image_url)}"
                     alt="${escapeHtml(recipe.title)}"
+					loading="lazy"
+					decoding="async"
                 >
             </div>
           `
@@ -87,7 +89,7 @@ function displayRecipe(recipe) {
 
 	const metadataItems = [];
 
-	if (recipe.servings) {
+	if (recipe.servings !== null && recipe.servings !== undefined) {
 		metadataItems.push(`
         <div class="recipe-meta-item">
             <span class="recipe-meta-label">Servings</span>
@@ -98,7 +100,7 @@ function displayRecipe(recipe) {
     `);
 	}
 
-	if (recipe.prep_time) {
+	if (recipe.prep_time !== null && recipe.prep_time !== undefined) {
 		metadataItems.push(`
         <div class="recipe-meta-item">
             <span class="recipe-meta-label">Prep time</span>
@@ -109,7 +111,7 @@ function displayRecipe(recipe) {
     `);
 	}
 
-	if (recipe.cook_time) {
+	if (recipe.cook_time !== null && recipe.cook_time !== undefined) {
 		metadataItems.push(`
         <div class="recipe-meta-item">
             <span class="recipe-meta-label">Cook time</span>
