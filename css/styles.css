@@ -586,6 +586,10 @@ input {
 .recipe-detail {
     max-width: 980px;
     margin: 0 auto;
+	padding: 3rem;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 4px;
 }
 
 /* =========================================
@@ -594,10 +598,10 @@ input {
 
 .recipe-detail-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 380px minmax(0, 1fr);
     gap: 3rem;
     align-items: center;
-    margin-bottom: 3.5rem;
+    margin-bottom: 3rem;
 }
 
 .recipe-detail-image {
@@ -610,14 +614,12 @@ input {
 .recipe-detail-image img {
     display: block;
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
 }
 
 .recipe-detail-content {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 2.75rem;
+    padding: 0;
 }
 
 .recipe-detail-header {
