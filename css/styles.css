@@ -1050,6 +1050,37 @@ input {
 	color: var(--accent);
 }
 
+.auth-forgot-password {
+    margin-top: -0.5rem;
+    margin-bottom: 1.25rem;
+    text-align: right;
+    font-size: 0.9rem;
+}
+
+.auth-forgot-password a {
+    color: var(--accent);
+}
+
+.auth-forgot-password a:hover {
+    color: var(--accent-dark);
+    text-decoration: underline;
+}
+
+.auth-back-link {
+	margin-top: 1.25rem;
+	text-align: center;
+	font-size: 0.9rem;
+}
+
+.auth-back-link a {
+	color: var(--accent);
+}
+
+.auth-back-link a:hover {
+	color: var(--accent-dark);
+	text-decoration: underline;
+}
+
 
 /* Mobile */
 
