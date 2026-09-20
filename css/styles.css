@@ -1081,6 +1081,24 @@ input {
 	text-decoration: underline;
 }
 
+.account-section {
+	margin-top: 2rem;
+	padding-top: 2rem;
+	border-top: 1px solid var(--border);
+}
+
+.account-section h2 {
+	margin-bottom: 0.75rem;
+}
+
+.account-section p {
+	margin-bottom: 1.25rem;
+}
+
+.account-info {
+	display: grid;
+	gap: 1rem;
+}
 
 /* Mobile */
 
