@@ -80,8 +80,8 @@ function displayRecipe(recipe) {
                 <img
                     src="${escapeHtml(recipe.image_url)}"
                     alt="${escapeHtml(recipe.title)}"
-					loading="lazy"
-					decoding="async"
+                    loading="lazy"
+                    decoding="async"
                 >
             </div>
           `
@@ -91,35 +91,35 @@ function displayRecipe(recipe) {
 
 	if (recipe.servings !== null && recipe.servings !== undefined) {
 		metadataItems.push(`
-        <div class="recipe-meta-item">
-            <span class="recipe-meta-label">Servings</span>
-            <span class="recipe-meta-value">
-                ${escapeHtml(recipe.servings)}
-            </span>
-        </div>
-    `);
+            <div class="recipe-meta-item">
+                <span class="recipe-meta-label">Servings</span>
+                <span class="recipe-meta-value">
+                    ${escapeHtml(recipe.servings)}
+                </span>
+            </div>
+        `);
 	}
 
 	if (recipe.prep_time !== null && recipe.prep_time !== undefined) {
 		metadataItems.push(`
-        <div class="recipe-meta-item">
-            <span class="recipe-meta-label">Prep time</span>
-            <span class="recipe-meta-value">
-                ${escapeHtml(recipe.prep_time)} min
-            </span>
-        </div>
-    `);
+            <div class="recipe-meta-item">
+                <span class="recipe-meta-label">Prep time</span>
+                <span class="recipe-meta-value">
+                    ${escapeHtml(recipe.prep_time)} min
+                </span>
+            </div>
+        `);
 	}
 
 	if (recipe.cook_time !== null && recipe.cook_time !== undefined) {
 		metadataItems.push(`
-        <div class="recipe-meta-item">
-            <span class="recipe-meta-label">Cook time</span>
-            <span class="recipe-meta-value">
-                ${escapeHtml(recipe.cook_time)} min
-            </span>
-        </div>
-    `);
+            <div class="recipe-meta-item">
+                <span class="recipe-meta-label">Cook time</span>
+                <span class="recipe-meta-value">
+                    ${escapeHtml(recipe.cook_time)} min
+                </span>
+            </div>
+        `);
 	}
 
 	const ingredients = Array.isArray(recipe.ingredients)
@@ -162,7 +162,7 @@ function displayRecipe(recipe) {
 			(currentUser && recipe.created_by === currentUser.id)
 		);
 
-		const actionsHtml = `
+	const actionsHtml = `
             <div class="recipe-actions">
 
                 <button
@@ -199,61 +199,65 @@ function displayRecipe(recipe) {
 	container.innerHTML = `
     <article class="recipe-detail">
 
-        ${imageHtml}
+        <div class="recipe-detail-hero">
 
-        <div class="recipe-detail-content">
+            ${imageHtml}
 
-            <div class="recipe-detail-header">
+            <div class="recipe-detail-content">
 
-                <p class="eyebrow">
-                    ${escapeHtml(category)}
-                </p>
+                <div class="recipe-detail-header">
 
-                <h1 class="recipe-detail-title">
-                    ${escapeHtml(recipe.title)}
-                </h1>
+                    <p class="eyebrow">
+                        ${escapeHtml(category)}
+                    </p>
 
-                ${description
+                    <h1 class="recipe-detail-title">
+                        ${escapeHtml(recipe.title)}
+                    </h1>
+
+                    ${description
 			? `
-                            <p class="recipe-detail-description">
-                                ${escapeHtml(description)}
-                            </p>
+                                <p class="recipe-detail-description">
+                                    ${escapeHtml(description)}
+                                </p>
+                              `
+			: ""
+		}
+
+                </div>
+
+                ${metadataItems.length > 0
+			? `
+                            <div class="recipe-meta">
+                                ${metadataItems.join("")}
+                            </div>
                           `
 			: ""
 		}
 
-            </div>
-
-            ${metadataItems.length > 0
-			? `
-                        <div class="recipe-meta">
-                            ${metadataItems.join("")}
-                        </div>
-                      `
-			: ""
-		}
-
-            ${actionsHtml}
-
-            <div class="recipe-columns">
-
-                <section class="recipe-ingredients">
-                    <h2>Ingredients</h2>
-                    ${ingredientsHtml}
-                </section>
-
-                <section class="recipe-instructions">
-                    <h2>Instructions</h2>
-                    <div class="instructions-text">
-                        ${instructionsHtml}
-                    </div>
-                </section>
+                ${actionsHtml}
 
             </div>
-
-            ${notesHtml}
 
         </div>
+
+        <div class="recipe-columns">
+
+            <section class="recipe-ingredients">
+                <h2>Ingredients</h2>
+                ${ingredientsHtml}
+            </section>
+
+            <section class="recipe-instructions">
+                <h2>Instructions</h2>
+                <div class="instructions-text">
+                    ${instructionsHtml}
+                </div>
+            </section>
+
+        </div>
+
+        ${notesHtml}
 
     </article>
 `;
