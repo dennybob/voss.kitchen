@@ -1095,6 +1095,10 @@ input {
 	margin-bottom: 1.25rem;
 }
 
+.account-section .secondary-button {
+	margin-top: 1.25rem;
+}
+
 .account-info {
 	display: grid;
 	gap: 1rem;
