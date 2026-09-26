@@ -1,3 +1,5 @@
+let currentAdminUserId = null;
+
 document.addEventListener("DOMContentLoaded", async () => {
   setCurrentYear();
 
@@ -16,6 +18,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Administrator confirmed
+const currentUser = await getCurrentUser();
+currentAdminUserId = currentUser ? currentUser.id : null;
+
   displayAdminWelcome(profile);
 
   await Promise.all([
@@ -138,13 +143,18 @@ function displayUsers(users) {
 						${user.is_admin ? "Remove Admin" : "Make Admin"}
 					</button>
 
-					<button
-						type="button"
-						class="admin-button"
-						onclick="toggleUserActive('${user.id}', ${user.active})"
-					>
-						${user.active ? "Deactivate" : "Reactivate"}
-					</button>
+					${user.id === currentAdminUserId
+  						? `<span class="admin-action-note">Current account</span>`
+  						: `
+    						<button
+      							ype="button"
+      							class="admin-button"
+      							onclick="toggleUserActive('${user.id}', ${user.active})"
+    						>
+      							${user.active ? "Deactivate" : "Reactivate"}
+    						</button>
+ 						`
+					}
 
 				</div>
               </td>
