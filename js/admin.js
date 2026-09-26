@@ -217,12 +217,13 @@ async function toggleUserActive(userId, currentValue) {
     if (!confirmed) return;
   }
 
-  const { error } = await supabaseClient
-    .from("profiles")
-    .update({
-      active: newValue
-    })
-    .eq("id", userId);
+  const { error } = await supabaseClient.rpc(
+    "set_user_active",
+    {
+      target_user_id: userId,
+      new_active: newValue
+    }
+  );
 
   if (error) {
     console.error("Error updating active status:", error);
