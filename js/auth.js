@@ -22,7 +22,7 @@ async function getCurrentProfile() {
 
 	const { data, error } = await supabaseClient
 		.from("profiles")
-		.select("id, display_name, approved, is_admin")
+		.select("id, display_name, approved, is_admin, active")
 		.eq("id", user.id)
 		.single();
 
