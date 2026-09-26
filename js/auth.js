@@ -112,6 +112,42 @@ async function updateAuthNavigation() {
  * Keep the navigation synchronized if the
  * authentication state changes.
  */
-supabaseClient.auth.onAuthStateChange(() => {
+
+async function checkActiveAccount() {
+
+	const user = await getCurrentUser();
+
+	if (!user) {
+		return true;
+	}
+
+
+	const profile = await getCurrentProfile();
+
+	if (!profile) {
+		return true;
+	}
+
+
+	if (!profile.active) {
+
+		await supabaseClient.auth.signOut();
+
+		/*
+		 * Don't redirect while already on the login page.
+		 */
+		if (!window.location.pathname.endsWith("login.html")) {
+			window.location.href = "login.html";
+		}
+
+		return false;
+	}
+
+
+	return true;
+}
+
+supabaseClient.auth.onAuthStateChange(async () => {
+	await checkActiveAccount();
 	updateAuthNavigation();
 });
