@@ -285,66 +285,88 @@ function displayRecipe(recipe) {
 }
 
 async function deleteRecipe(recipe) {
-	const confirmed = window.confirm(
-		`Are you sure you want to delete "${recipe.title}"?\n\nThis action cannot be undone.`
-	);
+    const confirmed = window.confirm(
+        `Are you sure you want to delete "${recipe.title}"?\n\nThis action cannot be undone.`
+    );
 
-	if (!confirmed) {
-		return;
-	}
+    if (!confirmed) {
+        return;
+    }
 
-	const button = document.getElementById("delete-recipe-button");
+    const button = document.getElementById("delete-recipe-button");
 
-	if (button) {
-		button.disabled = true;
-		button.textContent = "Deleting...";
-	}
+    if (button) {
+        button.disabled = true;
+        button.textContent = "Deleting...";
+    }
 
-	/*
-	 * Delete the recipe record first.
-	 */
-	const { error: deleteError } = await supabaseClient
-		.from("recipes")
-		.delete()
-		.eq("id", recipe.id);
+    /*
+     * Delete the recipe and return the deleted record.
+     *
+     * RLS may prevent deletion without Supabase
+     * returning an explicit error. Returning the
+     * deleted ID lets us verify the operation.
+     */
+    const { data: deletedRecipes, error: deleteError } =
+        await supabaseClient
+            .from("recipes")
+            .delete()
+            .eq("id", recipe.id)
+            .select("id");
 
-	if (deleteError) {
-		console.error("Error deleting recipe:", deleteError);
+    /*
+     * An error or an empty result means deletion
+     * was not confirmed.
+     */
+    if (deleteError || !deletedRecipes || deletedRecipes.length !== 1) {
 
-		if (button) {
-			button.disabled = false;
-			button.textContent = "Delete Recipe";
-		}
+        console.error(
+            "Recipe deletion failed or was not permitted:",
+            deleteError
+        );
 
-		alert("Unable to delete this recipe. Please try again.");
-		return;
-	}
+        if (button) {
+            button.disabled = false;
+            button.textContent = "Delete Recipe";
+        }
 
-	/*
-	 * If the recipe had an image, remove it from Storage.
-	 *
-	 * The database record is already gone at this point, so
-	 * failure here cannot leave the recipe itself in a bad state.
-	 */
-	if (recipe.image_url) {
-		const imagePath = getRecipeImagePath(recipe.image_url);
+        alert(
+            "Unable to delete this recipe. Your account may no longer have permission to modify it."
+        );
 
-		if (imagePath) {
-			const { error: storageError } = await supabaseClient
-				.storage
-				.from("recipe-images")
-				.remove([imagePath]);
+        return;
+    }
 
-			if (storageError) {
-				console.error(
-					"Recipe deleted, but image cleanup failed:",
-					storageError
-				);
-			}
-		}
-	}
+    /*
+     * The database confirmed that the recipe
+     * was deleted. Now remove its image.
+     */
+    if (recipe.image_url) {
 
-	window.location.href = "index.html";
+        const imagePath = getRecipeImagePath(recipe.image_url);
+
+        if (imagePath) {
+
+            const { error: storageError } =
+                await supabaseClient
+                    .storage
+                    .from("recipe-images")
+                    .remove([imagePath]);
+
+            if (storageError) {
+                console.error(
+                    "Recipe deleted, but image cleanup failed:",
+                    storageError
+                );
+            }
+        }
+    }
+
+    /*
+     * Redirect only after the database confirms
+     * that the recipe was deleted.
+     */
+    window.location.href = "index.html";
 }
 
 
