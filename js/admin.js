@@ -43,7 +43,7 @@ async function loadUsers() {
   try {
     const { data, error } = await supabaseClient
       .from("profiles")
-      .select("id, display_name, approved, is_admin, created_at")
+      .select("id, display_name, approved, is_admin, active, created_at")
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -83,6 +83,7 @@ function displayUsers(users) {
             <th>User</th>
             <th>Approved</th>
             <th>Administrator</th>
+			<th>Active</th>
             <th>Created</th>
             <th>Actions</th>
           </tr>
@@ -105,6 +106,12 @@ function displayUsers(users) {
               <td>
                 <span class="status-badge ${user.is_admin ? "status-admin" : "status-user"}">
                   ${user.is_admin ? "Admin" : "User"}
+                </span>
+              </td>
+
+              <td>
+                <span class="status-badge ${user.active ? "status-approved" : "status-pending"}">
+                  ${user.active ? "Active" : "Inactive"}
                 </span>
               </td>
 
