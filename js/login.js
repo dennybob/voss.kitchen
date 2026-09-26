@@ -13,10 +13,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		return;
 	}
 
-	/*
-	 * If the user is already logged in,
-	 * there is no reason to show the login form.
-	 */
 	const user = await getCurrentUser();
 
 	if (user) {
@@ -78,10 +74,6 @@ async function handleLogin(event) {
 	}
 
 
-	/*
-	 * Authentication succeeded.
-	 * Now check the user's profile.
-	 */
 	const profile = await getCurrentProfile();
 
 
@@ -89,6 +81,25 @@ async function handleLogin(event) {
 
 		message.textContent =
 			"Your account could not be loaded. Please contact the site administrator.";
+
+		message.classList.add("error");
+
+		await supabaseClient.auth.signOut();
+
+		button.disabled = false;
+		button.textContent = "Log In";
+
+		return;
+	}
+
+
+	/*
+	 * Deactivated accounts cannot access the website.
+	 */
+	if (!profile.active) {
+
+		message.textContent =
+			"Your account has been deactivated. Please contact the site administrator.";
 
 		message.classList.add("error");
 
@@ -112,9 +123,5 @@ async function handleLogin(event) {
 	}
 
 
-	/*
-	 * Approved user.
-	 * Send them back to the recipe page for now.
-	 */
 	window.location.href = "index.html";
 }
