@@ -122,23 +122,31 @@ function displayUsers(users) {
               <td>
                 <div class="admin-actions">
 
-                  <button
-                    type="button"
-                    class="admin-button"
-                    onclick="toggleUserApproval('${user.id}', ${user.approved})"
-                  >
-                    ${user.approved ? "Unapprove" : "Approve"}
-                  </button>
+					<button
+						type="button"
+						class="admin-button"
+						onclick="toggleUserApproval('${user.id}', ${user.approved})"
+					>
+						${user.approved ? "Unapprove" : "Approve"}
+					</button>
 
-                  <button
-                    type="button"
-                    class="admin-button"
-                    onclick="toggleUserAdmin('${user.id}', ${user.is_admin})"
-                  >
-                    ${user.is_admin ? "Remove Admin" : "Make Admin"}
-                  </button>
+					<button
+						type="button"
+						class="admin-button"
+						onclick="toggleUserAdmin('${user.id}', ${user.is_admin})"
+					>
+						${user.is_admin ? "Remove Admin" : "Make Admin"}
+					</button>
 
-                </div>
+					<button
+						type="button"
+						class="admin-button"
+						onclick="toggleUserActive('${user.id}', ${user.active})"
+					>
+						${user.active ? "Deactivate" : "Reactivate"}
+					</button>
+
+				</div>
               </td>
 
             </tr>
@@ -191,6 +199,34 @@ async function toggleUserAdmin(userId, currentValue) {
   if (error) {
     console.error("Error updating administrator status:", error);
     alert("Unable to update administrator status.");
+    return;
+  }
+
+  await loadUsers();
+}
+
+
+async function toggleUserActive(userId, currentValue) {
+  const newValue = !currentValue;
+
+  if (!newValue) {
+    const confirmed = confirm(
+      "Deactivate this user?\n\nThey will no longer be able to log in or modify recipes."
+    );
+
+    if (!confirmed) return;
+  }
+
+  const { error } = await supabaseClient
+    .from("profiles")
+    .update({
+      active: newValue
+    })
+    .eq("id", userId);
+
+  if (error) {
+    console.error("Error updating active status:", error);
+    alert("Unable to update user active status.");
     return;
   }
 
