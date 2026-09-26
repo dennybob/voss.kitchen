@@ -156,11 +156,16 @@ function displayRecipe(recipe) {
 		: "";
 
 	const canManageRecipe =
-		currentProfile &&
-		(
-			currentProfile.is_admin ||
-			(currentUser && recipe.created_by === currentUser.id)
-		);
+    	currentProfile &&
+    	currentProfile.active &&
+    	(
+    	    currentProfile.is_admin ||
+    	    (
+    	        currentProfile.approved &&
+    	        currentUser &&
+    	        recipe.created_by === currentUser.id
+    	    )
+    	);
 
 	const actionsHtml = `
             <div class="recipe-actions">
