@@ -147,7 +147,12 @@ async function checkActiveAccount() {
 	return true;
 }
 
-supabaseClient.auth.onAuthStateChange(async () => {
-	await checkActiveAccount();
-	updateAuthNavigation();
+supabaseClient.auth.onAuthStateChange(() => {
+    setTimeout(async () => {
+        const active = await checkActiveAccount();
+
+        if (active) {
+            await updateAuthNavigation();
+        }
+    }, 0);
 });

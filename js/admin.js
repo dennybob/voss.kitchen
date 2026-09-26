@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const profile = await getCurrentProfile();
 
   // Not logged in
-  if (!profile) {
+  if (!profile.is_admin || !profile.active) {
     window.location.href = "login.html";
     return;
   }
