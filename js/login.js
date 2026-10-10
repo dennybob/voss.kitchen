@@ -113,11 +113,14 @@ async function handleLogin(event) {
 
 
 	if (!profile.approved) {
-
 		message.textContent =
 			"Your account is waiting for approval. You can log in once your account has been approved.";
-
 		message.classList.add("pending");
+
+		await supabaseClient.auth.signOut();
+
+		button.disabled = false;
+		button.textContent = "Log In";
 
 		return;
 	}
