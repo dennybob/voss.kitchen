@@ -53,6 +53,24 @@ async function loadRecipe() {
 
 		return;
 	}
+	
+	const { data: contributors, error: contributorError } =
+		await supabaseClient.rpc(
+			"get_recipe_contributors",
+			{
+				recipe_ids: [recipe.id]
+			}
+		);
+
+	if (contributorError) {
+		console.error(
+			"Error loading recipe contributor:",
+			contributorError
+		);
+	} else {
+		recipe.contributor_display_name =
+			contributors?.[0]?.display_name || "";
+	}
 
 	displayRecipe(recipe);
 }
@@ -73,6 +91,15 @@ function displayRecipe(recipe) {
 
 	const category = recipe.category || "Recipe";
 	const description = recipe.description || "";
+
+	const contributorHtml = recipe.contributor_display_name
+		? `
+			<p class="recipe-contributor">
+				Contributed by
+				<span>${escapeHtml(recipe.contributor_display_name)}</span>
+			</p>
+		`
+		: "";
 
 	const imageHtml = recipe.image_url
 		? `
@@ -221,24 +248,26 @@ function displayRecipe(recipe) {
                     </h1>
 
                     ${description
-			? `
-                                <p class="recipe-detail-description">
-                                    ${escapeHtml(description)}
-                                </p>
-                              `
-			: ""
-		}
+						? `
+							<p class="recipe-detail-description">
+								${escapeHtml(description)}
+							</p>
+						`
+						: ""
+					}
+
+					${contributorHtml}
 
                 </div>
 
                 ${metadataItems.length > 0
-			? `
-                            <div class="recipe-meta">
-                                ${metadataItems.join("")}
-                            </div>
-                          `
-			: ""
-		}
+					? `
+						<div class="recipe-meta">
+							${metadataItems.join("")}
+						</div>
+					`
+					: ""
+				}
 
                 ${actionsHtml}
 

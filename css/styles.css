@@ -1730,3 +1730,121 @@ input {
         text-decoration: none;
     }
 }
+
+
+/* =========================================
+   My Recipes — Account Page
+   ========================================= */
+
+.my-recipes-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 22px;
+}
+
+.my-recipe-item {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 18px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+}
+
+.my-recipe-image {
+    display: block;
+    width: 76px;
+    height: 76px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.my-recipe-image-placeholder {
+    background: var(--surface-alt);
+}
+
+.my-recipe-info {
+    min-width: 0;
+}
+
+.my-recipe-info h3 {
+    margin: 0 0 6px;
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+}
+
+.my-recipe-info h3 a {
+    color: var(--text);
+    text-decoration: none;
+}
+
+.my-recipe-info h3 a:hover {
+    color: var(--accent);
+}
+
+.my-recipe-category,
+.my-recipe-date {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.my-recipe-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.my-recipes-empty {
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+}
+
+.my-recipes-empty p {
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+.my-recipes-empty .secondary-button {
+    display: inline-block;
+    margin-top: 8px;
+}
+
+/* =========================================
+   Recipe Contributor Credit
+   ========================================= */
+
+.recipe-contributor {
+    margin: 14px 0 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.recipe-contributor span {
+    color: var(--text);
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .my-recipe-item {
+        grid-template-columns: 60px minmax(0, 1fr);
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .my-recipe-image {
+        width: 60px;
+        height: 60px;
+    }
+
+    .my-recipe-actions {
+        grid-column: 2;
+    }
+}
