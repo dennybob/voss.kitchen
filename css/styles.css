@@ -1848,3 +1848,13 @@ input {
         grid-column: 2;
     }
 }
+
+/* =========================================
+   Account Page Specifics
+   ========================================= */
+
+.account-card {
+    max-width: 740px;
+    margin-left: auto;
+    margin-right: auto;
+}
