@@ -1853,8 +1853,7 @@ input {
    Account Page Specifics
    ========================================= */
 
-.account-card {
-    max-width: 740px;
-    margin-left: auto;
-    margin-right: auto;
+/* Wider layout for the Account page only */
+.auth-card.account-card {
+    width: min(100%, 740px);
 }
