@@ -35,77 +35,109 @@ async function getCurrentProfile() {
 }
 
 
+
 async function updateAuthNavigation() {
-	const authLink = document.getElementById("auth-nav-link");
-	const addRecipeLink = document.getElementById("add-recipe-nav-link");
-	const adminLink = document.getElementById("admin-nav-link");
+    const authLink = document.getElementById("auth-nav-link");
+    const accountLink = document.getElementById("account-nav-link");
+    const addRecipeLink = document.getElementById("add-recipe-nav-link");
+    const adminLink = document.getElementById("admin-nav-link");
 
-	if (!authLink) {
-		return;
-	}
+    if (!authLink) {
+        return;
+    }
 
-	const user = await getCurrentUser();
+    const user = await getCurrentUser();
 
-	/*
-	 * Visitor
-	 */
-	if (!user) {
-		authLink.textContent = "Log In";
-		authLink.href = "login.html";
-		authLink.onclick = null;
+    // Default to hidden for links requiring authentication.
+    if (accountLink) accountLink.style.display = "none";
+    if (addRecipeLink) addRecipeLink.style.display = "none";
+    if (adminLink) adminLink.style.display = "none";
 
-		if (addRecipeLink) {
-			addRecipeLink.style.display = "none";
-		}
+    if (!user) {
+        authLink.textContent = "Log In";
+        authLink.href = "login.html";
+        authLink.onclick = null;
+    } else {
+        const profile = await getCurrentProfile();
 
-		if (adminLink) {
-			adminLink.style.display = "none";
-		}
+        authLink.textContent = "Log Out";
+        authLink.href = "#";
 
-		return;
-	}
+        if (accountLink) {
+            accountLink.style.display = "";
+            accountLink.href = "account.html";
+        }
 
+        if (addRecipeLink && profile?.approved) {
+            addRecipeLink.style.display = "";
+        }
 
-	const profile = await getCurrentProfile();
+        if (adminLink && profile?.is_admin) {
+            adminLink.style.display = "";
+        }
 
+        authLink.onclick = async (event) => {
+            event.preventDefault();
 
-	/*
-	 * Logged-in user
-	 */
-	authLink.textContent = "Log Out";
-	authLink.href = "#";
+            authLink.style.pointerEvents = "none";
 
-	authLink.onclick = async (event) => {
-		event.preventDefault();
+            const { error } = await supabaseClient.auth.signOut();
 
-		const { error } = await supabaseClient.auth.signOut();
+            if (error) {
+                console.error("Error logging out:", error);
+                authLink.style.pointerEvents = "";
+                return;
+            }
 
-		if (error) {
-			console.error("Error logging out:", error);
-			return;
-		}
+            window.location.href = "index.html";
+        };
+    }
 
-		window.location.href = "index.html";
-	};
-
-
-	/*
-	 * Add Recipe is available only to approved users.
-	 */
-	if (addRecipeLink) {
-		addRecipeLink.style.display =
-			profile && profile.approved ? "" : "none";
-	}
-
-
-	/*
-	 * Admin dashboard is available only to administrators.
-	 */
-	if (adminLink) {
-		adminLink.style.display =
-			profile && profile.is_admin ? "" : "none";
-	}
+    setActiveNavigation();
 }
+
+
+/*
+ * Highlight the current section automatically.
+ */
+function setActiveNavigation() {
+    const page = window.location.pathname.split("/").pop() || "index.html";
+
+    let activeHref = null;
+
+    if (page === "about.html") {
+        activeHref = "about.html";
+    } else if (page === "account.html") {
+        activeHref = "account.html";
+    } else if (page === "admin.html") {
+        activeHref = "admin.html";
+    } else if (
+        ["login.html", "reset-password.html",
+         "update-password.html"].includes(page)
+    ) {
+        activeHref = "login.html";
+    } else if (page === "change-password.html") {
+        activeHref = "account.html";
+    } else if (
+        ["index.html", "recipe.html",
+         "add-recipe.html", "edit-recipe.html"].includes(page)
+    ) {
+        activeHref = "index.html";
+    }
+
+    document.querySelectorAll(".main-nav .nav-link").forEach(link => {
+        const isActive = link.getAttribute("href") === activeHref;
+
+        link.classList.toggle("active", isActive);
+
+        if (isActive) {
+            link.setAttribute("aria-current", "page");
+        } else {
+            link.removeAttribute("aria-current");
+        }
+    });
+}
+
 
 
 /*
